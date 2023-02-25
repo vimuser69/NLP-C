@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 char **strarr(char *string, char *delim) {
     char **result;
@@ -67,16 +68,47 @@ char **rdstrarr(char **strarr) {
     return result;
 }
 
+char **unionstrarr(char **strarr1, char **strarr2) {
+    char **temp;
+    temp = (char **)malloc(sizeof(char *) * (strarrlen(strarr1) + strarrlen(strarr2)));
+    size_t k = 0;
+    for (size_t i=0; i<strarrlen(strarr1); i++) {
+        temp[k] = (char *)malloc(sizeof(char) * strlen(strarr1[i]));
+        strcpy(temp[k], strarr1[i]);
+        k++;
+    }
+    for (size_t i=0; i<strarrlen(strarr2); i++) {
+        temp[k] = (char *)malloc(sizeof(char) * strlen(strarr2[i]));
+        strcpy(temp[k], strarr2[i]);
+        k++;
+    }
+    char **result = rdstrarr(temp);
+    free(temp);
+    return result;
+}
+
+char **interstrarr(char **strarr1, char **strarr2) {
+    char **temp;
+    temp = (char **)malloc(sizeof(char *) * (strarrlen(strarr1) + strarrlen(strarr2)));
+    size_t k = 0;
+    for (size_t i=0; i<strarrlen(strarr1); i++) {
+        for (size_t e=0; e<strarrlen(strarr2); e++) {
+            if (strcmp(strarr1[i], strarr2[e]) == 0) {
+                temp[k] = (char *)malloc(sizeof(char) * strlen(strarr1[i]));
+                strcpy(temp[k], strarr1[i]);
+                k++;
+            }
+        }
+    }
+    char **result = rdstrarr(temp);
+    free(temp);
+    return result;
+}
+
 int main() {
-    char **test = strarr("hello this is aa test test aa test gagagagaa", " ");
-    char **remtest = rdstrarr(test);
-    printf("%lu\n", strarrlen(test));
-    printf("%lu\n", strarrlen(remtest));
-    if (test[9] == NULL) {
-        printf("YES TEST!\n");
-    }
-    if (remtest[6] == NULL) {
-        printf("YES REMTEST!\n");
-    }
+    char **test1 = strarr("hi there lol hello hi", " ");
+    char **test2 = strarr("hello there lol", " ");
+    //char **unionsa = unionstrarr(test1, test2);
+    char **intersa = interstrarr(test1, test2);
     return 0;
 }
