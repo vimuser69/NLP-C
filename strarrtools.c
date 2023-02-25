@@ -95,7 +95,8 @@ char **interstrarr(char **strarr1, char **strarr2) {
         for (size_t e=0; e<strarrlen(strarr2); e++) {
             if (strcmp(strarr1[i], strarr2[e]) == 0) {
                 temp[k] = (char *)malloc(sizeof(char) * strlen(strarr1[i]));
-                strcpy(temp[k], strarr1[i]);
+                printf("%s\n", strarr1[i]);
+                //strcpy(temp[k], strarr1[i]); ????
                 k++;
             }
         }
