@@ -2,18 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <unistd.h>
 
 char **strarr(char *string, char *delim) {
     char **result;
-    char *token;
     size_t i = 0;
-    token = strtok(strdup(string), delim);
+    char *token = strtok(strdup(string), delim);
     while (token != NULL) {
         i++;
         token = strtok(NULL, delim);
     }
-    result = (char **)malloc(sizeof(char *) * i + 1);
+    result = (char **)malloc(sizeof(char *) * (i + 1));
     i = 0;
     token = strtok(strdup(string), delim);
     while (token != NULL) {
@@ -22,7 +20,7 @@ char **strarr(char *string, char *delim) {
         i++;
         token = strtok(NULL, delim);
     }
-    result[i+1] = NULL;
+    result[i] = NULL;
     free(token);
     return result;
 }
@@ -44,9 +42,21 @@ bool instrarr(char **strarr, char *string) {
     return false;
 }
 
+char **shstrarr(char **strarr) {
+    char **result = (char **)malloc(sizeof(char *) * strarrlen(strarr));
+    for (size_t i=0; i<strarrlen(strarr); i++) {
+        result[i] = (char *)malloc(sizeof(char) * strlen(strarr[i]));
+        strcpy(result[i], strarr[i]);
+    }
+    result[strarrlen(strarr)] = NULL;
+    return result;
+}
+
 char **rdstrarr(char **strarr) {
-    char **temp;
-    temp = (char **)malloc(sizeof(char *) * strarrlen(strarr));
+    char **temp = (char **)malloc(sizeof(char *) * strarrlen(strarr));
+    for (size_t i = 0; i < strarrlen(strarr); i++) {
+        temp[i] = NULL;
+    }
     size_t k = 0;
     for (size_t i=0; i<strarrlen(strarr); i++) {
         for (size_t e=0; e<strarrlen(strarr); e++) {
@@ -57,20 +67,17 @@ char **rdstrarr(char **strarr) {
             }
         }
     }
-    char **result;
-    result = (char **)malloc(sizeof(char *) * strarrlen(temp) + 1);
-    for (size_t i=0; i<strarrlen(temp); i++) {
-        result[i] = (char *)malloc(sizeof(char) * strlen(temp[i]));
-        strcpy(result[i], temp[i]);
-    }
-    result[strarrlen(temp)] = NULL;
+    temp[k] = NULL;
+    char **result = shstrarr(temp);
     free(temp);
     return result;
 }
 
 char **unionstrarr(char **strarr1, char **strarr2) {
-    char **temp;
-    temp = (char **)malloc(sizeof(char *) * (strarrlen(strarr1) + strarrlen(strarr2)));
+    char **temp = (char **)malloc(sizeof(char *) * (strarrlen(strarr1) + strarrlen(strarr2)));
+    for (size_t i=0; i<(strarrlen(strarr1) + strarrlen(strarr2)); i++) {
+        temp[i] = NULL;
+    }
     size_t k = 0;
     for (size_t i=0; i<strarrlen(strarr1); i++) {
         temp[k] = (char *)malloc(sizeof(char) * strlen(strarr1[i]));
@@ -82,34 +89,40 @@ char **unionstrarr(char **strarr1, char **strarr2) {
         strcpy(temp[k], strarr2[i]);
         k++;
     }
+    temp[k] = NULL;
     char **result = rdstrarr(temp);
     free(temp);
     return result;
 }
 
 char **interstrarr(char **strarr1, char **strarr2) {
-    char **temp;
-    temp = (char **)malloc(sizeof(char *) * (strarrlen(strarr1) + strarrlen(strarr2)));
+    char **temp = (char **)malloc(sizeof(char *) * (strarrlen(strarr1) + strarrlen(strarr2)));
+    for (size_t i=0; i<(strarrlen(strarr1) + strarrlen(strarr2)); i++) {
+        temp[i] = NULL;
+    }
     size_t k = 0;
     for (size_t i=0; i<strarrlen(strarr1); i++) {
         for (size_t e=0; e<strarrlen(strarr2); e++) {
             if (strcmp(strarr1[i], strarr2[e]) == 0) {
                 temp[k] = (char *)malloc(sizeof(char) * strlen(strarr1[i]));
-                printf("%s\n", strarr1[i]);
-                //strcpy(temp[k], strarr1[i]); ????
+                strcpy(temp[k], strarr1[i]);
                 k++;
             }
         }
     }
+    temp[k] = NULL;
     char **result = rdstrarr(temp);
     free(temp);
     return result;
 }
 
+double jaccardstrarr(char **strarr1, char **strarr2) {
+    return (double)strarrlen(interstrarr(strarr1, strarr2)) / strarrlen(unionstrarr(strarr1, strarr2));
+}
+
 int main() {
-    char **test1 = strarr("hi there lol hello hi", " ");
-    char **test2 = strarr("hello there lol", " ");
-    //char **unionsa = unionstrarr(test1, test2);
-    char **intersa = interstrarr(test1, test2);
+    char **test1 = strarr("cat dog hippo monkey", " ");
+    char **test2 = strarr("monkey rhino ostrich salmon", " ");
+    printf("%lf\n", jaccardstrarr(test1, test2)); // 1/7 = 0.142857 CORRECT!
     return 0;
 }
